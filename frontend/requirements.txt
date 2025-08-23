@@ -1,1 +1,10 @@
+streamlit==1.47.1
+requests
+openai
+fastapi
+uvicorn
+pymongo==4.13.2
+python-dotenv
+pydantic
+streamlit
 

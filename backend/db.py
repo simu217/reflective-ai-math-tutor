@@ -1,89 +1,81 @@
-# backend/db.py
-
-import os
-import datetime
 from pymongo import MongoClient
-from dotenv import load_dotenv
+from datetime import datetime
+import os
 
-# Load environment variables from .env
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/reflectiveai")
+client = MongoClient(MONGO_URI)
+db = client["reflectiveai"]
 
-# Connect to MongoDB
-client = MongoClient(os.getenv("MONGO_URI"))
-db = client["math_tutor"]
+# Collections
+users_collection = db["users"]
+questions_collection = db["questions"]
+feedback_collection = db["feedback"]
+performance_collection = db["performance"]
 
-# Define collections
-users = db["users"]
-questions = db["questions"]
-feedback = db["feedback"]
-performance = db["performance"]
-
-# -----------------------
-# USER OPERATIONS
-# -----------------------
-
-def create_user(name, grade_level):
+# ---------------- USER ----------------
+def create_user(name, grade, topic):
     user = {
         "name": name,
-        "grade_level": grade_level,
-        "preferences": {},
-        "created_at": datetime.datetime.utcnow()
+        "grade": grade,
+        "topic": topic,
+        "created_at": datetime.utcnow()
     }
-    return users.insert_one(user).inserted_id
+    result = users_collection.insert_one(user)
+    return str(result.inserted_id)
 
-def get_user_by_name(name):
-    return users.find_one({"name": name})
-
-def get_user_by_id(user_id):
-    return users.find_one({"_id": user_id})
-
-# -----------------------
-# QUESTION OPERATIONS
-# -----------------------
-
-def log_question(user_id, question_text, answer_given, correct):
-    entry = {
+# ---------------- QUESTIONS ----------------
+def log_question(user_id, question, answer, correct):
+    doc = {
         "user_id": user_id,
-        "question_text": question_text,
-        "answer_given": answer_given,
+        "question": question,
+        "answer": answer,
         "correct": correct,
-        "timestamp": datetime.datetime.utcnow()
+        "timestamp": datetime.utcnow()
     }
-    return questions.insert_one(entry).inserted_id
+    result = questions_collection.insert_one(doc)
+    return str(result.inserted_id)
 
-def get_last_n_questions(user_id, n=5):
-    return list(questions.find({"user_id": user_id}).sort("timestamp", -1).limit(n))
-
-# -----------------------
-# FEEDBACK OPERATIONS
-# -----------------------
-
-def log_feedback(question_id, reflection_text, emoji, confidence_level):
-    entry = {
+# ---------------- FEEDBACK ----------------
+def log_feedback(question_id, reflection, emotion, confidence, user_id=None):
+    doc = {
         "question_id": question_id,
-        "reflection": reflection_text,
-        "emoji": emoji,
-        "confidence": confidence_level,
-        "timestamp": datetime.datetime.utcnow()
+        "user_id": user_id,  # optional but useful for queries
+        "reflection": reflection,
+        "emotion": emotion,
+        "confidence": confidence,
+        "timestamp": datetime.utcnow()
     }
-    return feedback.insert_one(entry).inserted_id
+    feedback_collection.insert_one(doc)
 
-def get_feedback_by_question(question_id):
-    return feedback.find_one({"question_id": question_id})
-
-# -----------------------
-# PERFORMANCE TRACKING
-# -----------------------
-
-def log_performance(user_id, topic, correct, emotion):
-    entry = {
+# ---------------- PERFORMANCE ----------------
+def log_performance(user_id, topic, score, difficulty):
+    """
+    score: float (0.0 → 1.0, e.g. 0.8 for 8/10 correct)
+    difficulty: int (difficulty level when quiz ended)
+    """
+    doc = {
         "user_id": user_id,
         "topic": topic,
-        "correct": correct,
-        "emotion": emotion,
-        "timestamp": datetime.datetime.utcnow()
+        "score": score,
+        "difficulty": difficulty,
+        "timestamp": datetime.utcnow()
     }
-    return performance.insert_one(entry).inserted_id
+    performance_collection.insert_one(doc)
 
-def get_recent_performance(user_id, limit=10):
-    return list(performance.find({"user_id": user_id}).sort("timestamp", -1).limit(limit))
+# ---------------- QUERY PERFORMANCE ----------------
+def get_recent_performance(user_id, limit=5):
+    logs = (
+        performance_collection
+        .find({"user_id": user_id})
+        .sort("timestamp", -1)
+        .limit(limit)
+    )
+    return list(logs)
+
+# ---------------- INDEXES (ensure once) ----------------
+def ensure_indexes():
+    """Create indexes for faster queries (safe to call multiple times)."""
+    users_collection.create_index("name")
+    questions_collection.create_index("user_id")
+    feedback_collection.create_index([("question_id", 1), ("user_id", 1)])
+    performance_collection.create_index("user_id")

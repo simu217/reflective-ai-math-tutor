@@ -1,4 +1,6 @@
 fastapi
 uvicorn
-pymongo
+pymongo==4.13.2
+openai
 python-dotenv
+pydantic
