@@ -24,18 +24,26 @@ Built with **FastAPI** (backend), **Streamlit** (frontend), **MongoDB** (databas
    ```
 
 3. Environment Variables: Create a .env file in the root directory and configure:
+
+```bash
    OPENAI_API_KEY=your_openai_api_key
    MONGO_URI=mongodb://mongo:27017
+```
 
 4. Run with Docker Compose
 
-   docker-compose up --build
+   ```bash
+      docker-compose up --build
+
+   ```
 
    Backend: Runs on http://localhost:8000
    Frontend: Runs on http://localhost:8501
    MongoDB: Runs inside Docker (default port 27017)
 
+```bash
    cd reflective-ai-math-tutor
+```
 
 Author
 
