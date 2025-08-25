@@ -21,10 +21,16 @@ def generate_math_question(grade, topic, student_name,difficulty):
 
     variation_prompts = [
         "math question simple numeric format like '23 + 4 = ?' or '9 - 5 = ?'.",
+        "Generate an addition question with simple fractions for Grade 4–5. Provide answer in number format. Example: 1/2 + 1/2 = ? Answer: 1”",
+        "math question using a number line scenario with a number answer.",
+        "math question including zero",
+        "math question with consecutive numbers",
+        "math question of word problem about money with a number answer.",
         "math question formatted like a mini puzzle or riddle.",
-        "math question as a sequence or pattern that the student needs to complete.",
+        "math question with four options and a number answer.",
+        "math question with a missing number",
+        "math question as a sequence of numbers that the student needs to complete.",
         "math question where the numbers are part of a short story involving animals or toys, different from previous questions",
-        "math question with two steps required to solve but still numeric and simple.",
         "math question formatted as a word problem and numbers should be changed",
     ]
     variation_prompt = random.choice(variation_prompts)
@@ -42,15 +48,12 @@ def generate_math_question(grade, topic, student_name,difficulty):
     - Output a single math problem in plain numeric format (no extra text).
     - Do NOT repeat any problem from this list of already asked questions:
       {list(asked_questions)[:10]}  # only pass recent 10 for context
-    - Keep it short and clear."""
+    - Keep it moderate in length but clear."""
 
     )
-
+    print(variation_prompt)
     if student_name:
         prompt += f"\nThe student's name is {student_name} to make it more personalized."
-    print("-==============================")
-    print(prompt)
-    print("-==============================")
 
     try:
         response = client.chat.completions.create(
@@ -61,7 +64,6 @@ def generate_math_question(grade, topic, student_name,difficulty):
         )
 
         content = response.choices[0].message.content.strip()
-        print("ehlo",content)
         lines = content.splitlines()
         question = next((line.split(":", 1)[1].strip() for line in lines if line.lower().startswith("question:")), "Unknown question")
         answer = next((line.split(":", 1)[1].strip() for line in lines if line.lower().startswith("answer:")), "Unknown answer")

@@ -50,7 +50,7 @@ _init_state()
 st.title("Reflective AI Math Tutor 🤖📚")
 st.warning("⚠️ Don’t refresh/reload the page — progress will reset!")
 
-MAX_QUESTIONS = 2  # use 10 for full quiz
+MAX_QUESTIONS = 10 # number of quiz questions are 10
 
 # ---------------- HELPER: show final summary ----------------
 def show_and_log_final_summary():
