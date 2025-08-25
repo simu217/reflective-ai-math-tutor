@@ -21,8 +21,6 @@ def generate_math_question(grade, topic, student_name,difficulty):
 
     variation_prompts = [
         "math question simple numeric format like '23 + 4 = ?' or '9 - 5 = ?'.",
-        "Generate an addition question with simple fractions for Grade 4–5. Provide answer in number format. Example: 1/2 + 1/2 = ? Answer: 1”",
-        "math question using a number line scenario with a number answer.",
         "math question including zero",
         "math question with consecutive numbers",
         "math question of word problem about money with a number answer.",
@@ -31,6 +29,7 @@ def generate_math_question(grade, topic, student_name,difficulty):
         "math question with a missing number",
         "math question as a sequence of numbers that the student needs to complete.",
         "math question where the numbers are part of a short story involving animals or toys, different from previous questions",
+        "math question using a number line scenario with a number answer.",
         "math question formatted as a word problem and numbers should be changed",
     ]
     variation_prompt = random.choice(variation_prompts)
